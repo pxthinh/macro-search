@@ -12,10 +12,11 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $users = User::with('company')
-            ->whereLike(['name', 'email', 'company.name', 'company.bio'], 'giúp bạn')
-            ->paginate(1000);
-
+        $query = User::with('company');
+        if(isset($request->keyword)){
+            $query->whereLike(['name', 'email', 'company.name', 'company.bio'], $request->keyword);
+        }
+       $users =  $query->paginate(30);
         return view('users.index', compact('users'));
     }
 

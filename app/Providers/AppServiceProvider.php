@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use App\Mixins\CollectionMixin;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +25,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Collection::mixin(new CollectionMixin());
+
+        Collection::macro('toUpper', function () {
+            return $this->map(function (string $value) {
+                return Str::upper($value);
+            });
+        });
+
+
+        Http::macro('github', function () {
+            return Http::withHeaders([ 'X-Example' =>'example',
+            ])->baseUrl('https://github.com');
+        });
+
         Builder::macro('whereLike', function ($attributes, string $searchTerm) {
             $this->where(function (Builder $query) use ($attributes, $searchTerm) {
                 foreach (Arr::wrap($attributes) as $attribute) {
